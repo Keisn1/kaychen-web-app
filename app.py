@@ -4,6 +4,7 @@ from auth import STATIC_TOKEN, TokenMiddleware, login_required, on_exception
 from storage import BookStorage
 
 app = API()
+
 book_storage = BookStorage()
 book_storage.create(name="7 habits of highly effective people", author="Stephen Covey")
 app.add_middleware(TokenMiddleware)
