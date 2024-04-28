@@ -1,7 +1,6 @@
-from typing import NamedTuple
+from kaychen.orm import Table, Column
 
 
-class Book(NamedTuple):
-    id: int
-    name: str
-    author: str
+class Book(Table):
+    author = Column(str)
+    name = Column(str)

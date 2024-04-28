@@ -1,6 +1,8 @@
 from kaychen.api import API
+from kaychen.orm import Database
 
 from auth import STATIC_TOKEN, TokenMiddleware, login_required, on_exception
+from models import Book
 from storage import BookStorage
 
 app = API()
@@ -10,10 +12,13 @@ book_storage.create(name="7 habits of highly effective people", author="Stephen 
 app.add_middleware(TokenMiddleware)
 app.add_exception_handler(on_exception)
 
+db = Database("./myapp.db")
+db.create(Book)
+
 
 @app.route("/", allowed_methods=["get"])
 def index(req, resp):
-    books = book_storage.all()
+    books = db.all(Book)
     resp.html = app.template("index.html", context={"books": books})
 
 
@@ -25,15 +30,16 @@ def login(req, resp):
 @app.route("/books", allowed_methods=["post"])
 @login_required
 def create_book(req, resp):
-    book = book_storage.create(**req.POST)
+    book = Book(**req.POST)
+    db.save(book)
 
     resp.status_code = 201
-    resp.json = book._asdict()
+    resp.json = {"name": book.name, "author": book.author}
 
 
 @app.route("/books/{id:d}", allowed_methods=["delete"])
 @login_required
 def delete_book(req, resp, id):
-    book_storage.delete(id)
+    db.delete(Book, id)
 
     resp.status_code = 204
